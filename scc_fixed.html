@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCC Dispatcher - Sheriff Department</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Consolas', 'Segoe UI', monospace;
+        }
+
+        body {
+            background-color: #0b0f12;
+            color: #d1dcd6;
+            padding-bottom: 40px;
+        }
+
+        .scc-header {
+            background-color: #111a16;
+            border-bottom: 3px solid #1e3f20;
+            padding: 15px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .scc-logo-zone {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .scc-badge {
+            background-color: #c49a45;
+            color: #111a16;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 0 8px rgba(196,154,69,0.3);
+        }
+
+        .scc-title {
+            color: #e5c158;
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        .scc-subtitle {
+            color: #829a86;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .btn-admin-toggle {
+            background-color: #1c2721;
+            color: #e5c158;
+            border: 1px solid #c49a45;
+            padding: 8px 16px;
+            font-size: 12px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-admin-toggle:hover {
+            background-color: #c49a45;
+            color: #111a16;
+        }
+
+        .system-status {
+            font-size: 12px;
+            color: #22c55e;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #22c55e;
+            border-radius: 5px;
+            box-shadow: 0 0 8px #22c55e;
+        }
+
+        .container {
+            max-width: 1500px;
+            margin: 20px auto;
+            background: #141b1f;
+            padding: 25px;
+            border: 1px solid #1e292d;
+            border-radius: 8px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+        }
+
+        .view-section {
+            display: none;
+        }
+
+        .view-section.active {
+            display: block;
+        }
+
+        .category-bar-wrapper {
+            border-bottom: 1px solid #22343a;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .category-label {
+            font-size: 12px;
+            color: #c49a45;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+
+        .button-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .btn-top {
+            background-color: #192524;
+            color: #a3b899;
+            border: 1px solid #2e473b;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .btn-top:hover {
+            background-color: #223533;
+            color: #e5c158;
+        }
+
+        .btn-top.active {
+            background-color: #2b593f;
+            color: #ffffff;
+            border-color: #448c5d;
+            box-shadow: 0 0 12px rgba(68,140,93,0.3);
+        }
+
+        .search-wrapper {
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: #0c1114;
+            border: 1px solid #2d3f44;
+            border-radius: 4px;
+            color: #ffffff;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-input:focus {
+            border-color: #e5c158;
+        }
+
+        .workspace {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 12px;
+            color: #829a86;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #2d3f44;
+            border-radius: 4px;
+            font-size: 14px;
+            background-color: #0c1114;
+            color: white;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .dynamic-inputs-panel {
+            background-color: #0c1114;
+            border: 1px solid #1e2a2e;
+            padding: 20px;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+
+        .dynamic-inputs-panel h4 {
+            margin-bottom: 15px;
+            font-size: 13px;
+            color: #e5c158;
+            text-transform: uppercase;
+            border-bottom: 1px dashed #22343a;
+            padding-bottom: 5px;
+        }
+
+        .input-field-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            gap: 15px;
+            background: #141b1f;
+            padding: 10px;
+            border-radius: 4px;
+            border: 1px solid #1e292d;
+        }
+
+        .input-field-row label {
+            width: 140px;
+            font-size: 13px;
+            color: #a3b899;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .input-field-row input {
+            flex: 1;
+            padding: 10px 12px;
+            background-color: #0c1114;
+            border: 1px solid #2d3f44;
+            border-radius: 4px;
+            color: white;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .input-field-row input:focus {
+            border-color: #e5c158;
+            box-shadow: 0 0 5px rgba(229,193,88,0.3);
+        }
+
+        .preview-title {
+            font-size: 14px;
+            font-weight: bold;
+            color: #e5c158;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .btn-action {
+            background-color: #1d2a30;
+            color: white;
+            border: 1px solid #334954;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            flex: 1;
+        }
+
+        .btn-action.copy-main {
+            background-color: #c49a45;
+            color: #111a16;
+            border: none;
+        }
+
+        .btn-danger {
+            background-color: #722424;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 15px;
+        }
+
+        .output-box {
+            background-color: #070a0c;
+            padding: 20px;
+            border-radius: 4px;
+            border: 1px solid #1e2f2b;
+            font-size: 15px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            color: #38ef7d;
+            min-height: 120px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.8);
+        }
+
+        .login-card {
+            max-width: 400px;
+            margin: 60px auto;
+            background: #11171a;
+            border: 1px solid #c49a45;
+            padding: 30px;
+            border-radius: 6px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+
+        .login-card h3 {
+            color: #e5c158;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 14px;
+            letter-spacing: 1px;
+        }
+
+        .login-card input {
+            width: 100%;
+            padding: 12px;
+            background: #0c1114;
+            border: 1px solid #2d3f44;
+            color: white;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        .admin-layout {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+
+        .admin-panel-box {
+            background: #11171a;
+            border: 1px solid #2d3f44;
+            border-radius: 6px;
+            padding: 20px;
+        }
+
+        .admin-panel-box.danger-zone {
+            border-color: #722424;
+        }
+
+        .admin-panel-box h3 {
+            color: #e5c158;
+            font-size: 13px;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #2d3f44;
+            padding-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .admin-panel-box input, .admin-panel-box select, .admin-panel-box textarea {
+            width: 100%;
+            padding: 10px;
+            background: #0c1114;
+            border: 1px solid #2d3f44;
+            color: white;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            outline: none;
+            font-size: 13px;
+        }
+
+        .admin-panel-box textarea {
+            height: 80px;
+            resize: none;
+        }
+
+        .btn-admin-submit {
+            background-color: #22643c;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .btn-admin-delete {
+            background-color: #722424;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        .toast-notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #2b593f;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 4px;
+            font-weight: bold;
+            border: 1px solid #448c5d;
+            display: none;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="scc-header">
+        <div class="scc-logo-zone">
+            <div class="scc-badge">SASD</div>
+            <div>
+                <div class="scc-title">SHERIFF COMMUNICATIONS CENTER</div>
+                <div class="scc-subtitle">SCC TACTICAL RESPONSES INTEGRATED TERMINAL</div>
+            </div>
+        </div>
+        <div class="header-controls">
+            <button id="adminToggleBtn" class="btn-admin-toggle" onclick="toggleAdminView()">⚙️ TERMINAL MGR</button>
+            <div class="system-status">
+                <div class="status-dot"></div>
+                <span>SCC ACTIVE</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        
+        <div id="dispatchSection" class="view-section active">
+            <div class="category-bar-wrapper">
+                <div class="category-label">Bloques de Operación</div>
+                <div class="button-row" id="categoryButtonsContainer"></div>
+            </div>
+
+            <div class="search-wrapper">
+                <input type="text" id="searchInput" class="search-input" placeholder="🔍 BUSCADOR RÁPIDO (Escribe código o descripción para filtrar...)" oninput="filterCodesBySearch()">
+            </div>
+
+            <div class="workspace">
+                <div>
+                    <div class="form-group">
+                        <label for="codeSelect">Línea de Radio / Código Táctico:</label>
+                        <select id="codeSelect" class="form-select" onchange="loadCodeTemplate()"></select>
+                    </div>
+                    <div class="dynamic-inputs-panel">
+                        <h4>Variables Requeridas de la Plantilla</h4>
+                        <div id="dynamicInputsContainer"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="preview-title" id="previewTitle">Consola de Transmisión Táctica</div>
+                    <div class="action-buttons">
+                        <button class="btn-action copy-main" onclick="copyGeneratedText()">Copiar al Portapapeles</button>
+                    </div>
+                    <button class="btn-danger" onclick="resetFormFields()">Limpiar Cajas de Texto</button>
+                    <div class="output-box" id="outputPreview"></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="loginSection" class="view-section">
+            <div class="login-card">
+                <h3>AUTENTICACIÓN REQUERIDA - MGR CONSOLE</h3>
+                <input type="text" id="loginUser" placeholder="Usuario">
+                <input type="password" id="loginPass" placeholder="Contraseña">
+                <button class="btn-admin-submit" onclick="attemptLogin()">CONECTAR</button>
+            </div>
+        </div>
+
+        <div id="adminPanelSection" class="view-section">
+            <div style="display:flex; justify-content:space-between; margin-bottom:20px; align-items:center;">
+                <h2 style="color:#e5c158; font-size:16px;">⚙️ CONTROL DE DATOS Y PLANTILLAS</h2>
+                <div>
+                    <button class="btn-admin-submit" style="background:#b45309; padding:8px 15px; margin:0 10px 0 0;" onclick="factoryReset()">⚠️ RESTAURAR FÁBRICA</button>
+                    <button class="btn-admin-toggle" style="background:#451a1a; border-color:#722424; margin:0;" onclick="logoutAdmin()">CERRAR MGR</button>
+                </div>
+            </div>
+
+            <div class="admin-layout">
+                <div class="admin-panel-box">
+                    <h3>Añadir Datos & Respaldos</h3>
+                    
+                    <div style="border-bottom:1px dashed #2d3f44; margin-bottom:15px; padding-bottom:15px; display:flex; gap:10px;">
+                        <button class="btn-admin-submit" style="background-color:#c49a45; color:black; margin-bottom:0;" onclick="exportDatabase()">💾 Exportar BBDD</button>
+                        <button class="btn-admin-submit" style="background-color:#0284c7; color:white; margin-bottom:0;" onclick="triggerImportClick()">📂 Importar BBDD</button>
+                        <input type="file" id="importFileInput" accept=".json" style="display:none;" onchange="importDatabase(this)">
+                    </div>
+
+                    <div style="border-bottom:1px dashed #2d3f44; margin-bottom:15px; padding-bottom:10px;">
+                        <h4 style="font-size:11px; margin-bottom:5px; color:#829a86;">Nueva Categoría</h4>
+                        <input type="text" id="newCatName" placeholder="Nombre (Ej: CÓDIGOS 500)">
+                        <button class="btn-admin-submit" onclick="addNewCategory()">Crear Categoría</button>
+                    </div>
+                    <div>
+                        <h4 style="font-size:11px; margin-bottom:5px; color:#829a86;">Nueva Plantilla de Código</h4>
+                        <input type="text" id="newCodeName" placeholder="Nombre (Ej: 10-22 Cancelar)">
+                        <textarea id="newCodeTemplate" placeholder="Escribe el texto usando [Corchetes] para las variables."></textarea>
+                        <button class="btn-admin-submit" onclick="addNewCode()">Guardar en Bloque Activo</button>
+                    </div>
+                </div>
+
+                <div class="admin-panel-box danger-zone">
+                    <h3>Modificar / Eliminar Datos</h3>
+                    
+                    <div style="border-bottom:1px dashed #451a1a; margin-bottom:15px; padding-bottom:10px;">
+                        <h4 style="font-size:11px; margin-bottom:5px; color:#ef4444;">Mover Código de Categoría</h4>
+                        <select id="moveCodeSelect"></select>
+                        <select id="moveTargetCatSelect"></select>
+                        <button class="btn-admin-submit" style="background:#c49a45; color:black;" onclick="moveCodeCategory()">Transferir Código</button>
+                    </div>
+
+                    <div>
+                        <h4 style="font-size:11px; margin-bottom:5px; color:#ef4444;">Eliminar Elementos Definitivamente</h4>
+                        <label style="font-size:11px; color:#829a86;">Selecciona Código para Eliminar:</label>
+                        <select id="deleteCodeSelect"></select>
+                        <button class="btn-admin-delete" style="margin-bottom:15px;" onclick="deleteCode()">Eliminar Código</button>
+
+                        <label style="font-size:11px; color:#829a86;">Selecciona Categoría para Eliminar:</label>
+                        <select id="deleteCatSelect"></select>
+                        <button class="btn-admin-delete" onclick="deleteCategory()">Eliminar Categoría Completa</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="toast" class="toast-notification">TRANSMISIÓN COPIADA</div>
+
+    <script>
+        const defaultDatabase = {
+            categories: { "diez": "CÓDIGOS 10", "novecientos": "CÓDIGOS 900", "claves": "CLAVES / CÓDIGOS" },
+            codes: [
+                { id: "10-15", cat: "diez", name: "10-15 (Traslado de Detenido)", template: "Copiado [Callsign], iniciando 10-15 con un civil a bordo desde [Origen] hacia [Destino]. Avise al llegar." },
+                { id: "tstop-nom", cat: "diez", name: "T-STOP (Parada de Tráfico)", template: "Copiado [Callsign], el vehículo parado está a nombre de [Nombre], tiene [Cantidad] citaciones pendientes a su nombre." },
+                { id: "cod4", cat: "diez", name: "Código 4 (Apoyo Suficiente)", template: "Copiado Código 4 en [TAC]. Apoyo suficiente en el canal." },
+                { id: "77nora", cat: "diez", name: "Código 77 Nora (Unidad que no responde)", template: "Copiado, Dispatch lanzando Código 77 Nora sobre [Callsign]. Última ubicación conocida hace dos minutos en [Ubicación]. Unidades cercanas verifiquen estado." },
+                { id: "10-6", cat: "diez", name: "10-6 (Ocupado)", template: "Copiado [Callsign], se le registra 10-6 en su ubicación." },
+                { id: "10-8", cat: "diez", name: "10-8 (En servicio)", template: "Copiado [Callsign], 10-8 disponible para asignaciones. Buenas tardes/noches." },
+                { id: "10-28", cat: "diez", name: "10-28 (Información de automóvil)", template: "Copiado [Callsign], procesando 10-28 de la matrícula [Matrícula], mantenga." },
+                { id: "10-29V", cat: "diez", name: "10-29V (Vehículo robado)", template: "Copiado [Callsign], proceda con precaución. Matrícula [Matrícula] arroja un 10-29V activo." },
+                { id: "998", cat: "novecientos", name: "998 / 9-9-8 (Oficial Bajo Fuego)", template: "Copiado 998 en [Ubicación]. Todas las unidades disponibles inicien respuesta. Unidades en ruta pasen en dos." },
+                { id: "cod3", cat: "claves", name: "Código 3 (Emergencia con luces y sirenas)", template: "Copiado [Callsign] su desplazamiento en Código 3 hacia [Ubicación]." }
+            ]
+        };
+
+        // NUEVA LLAVE MAESTRA para obligar al navegador a no usar archivos viejos
+        let AppDB = JSON.parse(localStorage.getItem('scc_db_v10_omega')) || defaultDatabase;
+        let activeCategoryKey = Object.keys(AppDB.categories)[0] || "diez";
+        let isAdminLoggedIn = false;
+
+        const dispatchSection = document.getElementById('dispatchSection');
+        const loginSection = document.getElementById('loginSection');
+        const adminPanelSection = document.getElementById('adminPanelSection');
+        const adminToggleBtn = document.getElementById('adminToggleBtn');
+        const categoryButtonsContainer = document.getElementById('categoryButtonsContainer');
+        const codeSelect = document.getElementById('codeSelect');
+        const dynamicInputsContainer = document.getElementById('dynamicInputsContainer');
+        const previewTitle = document.getElementById('previewTitle');
+        const outputPreview = document.getElementById('outputPreview');
+        const searchInput = document.getElementById('searchInput');
+        const toast = document.getElementById('toast');
+
+        function saveDB() { localStorage.setItem('scc_db_v10_omega', JSON.stringify(AppDB)); }
+
+        function factoryReset() {
+            if(confirm("⚠️ ¿Borrar TODO y restaurar de fábrica?")) {
+                localStorage.removeItem('scc_db_v10_omega');
+                AppDB = JSON.parse(JSON.stringify(defaultDatabase));
+                activeCategoryKey = "diez";
+                saveDB();
+                poblarAdminControls();
+                renderCategoryButtons();
+                alert("Restaurado correctamente.");
+            }
+        }
+
+        function toggleAdminView() {
+            if (dispatchSection.classList.contains('active')) {
+                if (isAdminLoggedIn) { showSection('adminPanelSection'); } else { showSection('loginSection'); }
+            } else { showSection('dispatchSection'); }
+        }
+
+        function showSection(id) {
+            document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            if (id === 'dispatchSection') {
+                adminToggleBtn.innerText = "⚙️ TERMINAL MGR";
+                renderCategoryButtons();
+            } else {
+                adminToggleBtn.innerText = "📺 VER DISPATCH";
+            }
+        }
+
+        function attemptLogin() {
+            const u = document.getElementById('loginUser').value;
+            const p = document.getElementById('loginPass').value;
+            if (u === "ADM-SCC" && p === "ADM-SCC") {
+                isAdminLoggedIn = true;
+                showSection('adminPanelSection');
+                poblarAdminControls();
+                document.getElementById('loginUser').value = '';
+                document.getElementById('loginPass').value = '';
+            } else { alert("CREDENCIALES DE ACCESO INCORRECTAS"); }
+        }
+
+        function logoutAdmin() { isAdminLoggedIn = false; showSection('dispatchSection'); }
+
+        function renderCategoryButtons() {
+            categoryButtonsContainer.innerHTML = '';
+            Object.keys(AppDB.categories).forEach(key => {
+                let btn = document.createElement('button');
+                btn.className = `btn-top ${key === activeCategoryKey ? 'active' : ''}`;
+                btn.innerText = AppDB.categories[key];
+                btn.onclick = () => {
+                    activeCategoryKey = key;
+                    renderCategoryButtons();
+                    searchInput.value = '';
+                };
+                categoryButtonsContainer.appendChild(btn);
+            });
+            poblarSelectCodigos();
+        }
+
+        function poblarSelectCodigos(filteredCodes = null) {
+            codeSelect.innerHTML = '';
+            const codesToRender = filteredCodes || AppDB.codes.filter(c => c.cat === activeCategoryKey);
+
+            if(codesToRender.length === 0) {
+                let opt = document.createElement('option'); 
+                opt.innerText = "Ningún código en este bloque";
+                codeSelect.appendChild(opt); 
+                dynamicInputsContainer.innerHTML = ''; 
+                outputPreview.innerText = '';
+                return;
+            }
+
+            codesToRender.forEach(item => {
+                let opt = document.createElement('option'); 
+                opt.value = item.id; 
+                opt.innerText = item.name;
+                codeSelect.appendChild(opt);
+            });
+            
+            codeSelect.value = codesToRender[0].id;
+            loadCodeTemplate();
+        }
+
+        function filterCodesBySearch() {
+            const q = searchInput.value.toLowerCase().trim();
+            if (q === "") { poblarSelectCodigos(); return; }
+            const filtered = AppDB.codes.filter(c => c.name.toLowerCase().includes(q) || c.template.toLowerCase().includes(q));
+            poblarSelectCodigos(filtered);
+        }
+
+        // MOTOR JS MODERNO PARA EXTRAER CORCHETES INFALIBLEMENTE
+        function loadCodeTemplate() {
+            const selectedId = codeSelect.value;
+            if(!selectedId) return;
+            
+            const codeObj = AppDB.codes.find(c => c.id === selectedId);
+            if(!codeObj) return;
+
+            previewTitle.innerText = codeObj.name.toUpperCase();
+            dynamicInputsContainer.innerHTML = ''; 
+
+            const templateStr = codeObj.template;
+            
+            // Función nativa de Javascript para buscar lo que hay entre [ y ] sin fallos
+            const regex = /\[(.*?)\]/g;
+            let matches = [...templateStr.matchAll(regex)];
+            
+            // Extraer solo los nombres limpiando duplicados
+            let uniqueVars = [...new Set(matches.map(m => m[1]))];
+
+            // Actualizar el contador de variables en el título del panel
+            const panelTitle = dynamicInputsContainer.closest('.dynamic-inputs-panel').querySelector('h4');
+            panelTitle.innerText = `Variables de Despacho Encontradas [ ${uniqueVars.length} ]`;
+
+            if(uniqueVars.length === 0) {
+                dynamicInputsContainer.innerHTML = '<p style="color:#829a86; font-size:13px; font-style:italic;">Transmisión estática (Sin variables).</p>';
+            } else {
+                uniqueVars.forEach(v => {
+                    let row = document.createElement('div');
+                    row.className = 'input-field-row';
+                    
+                    let label = document.createElement('label');
+                    label.innerText = v + ":";
+                    label.style.cssText = 'width:140px; font-size:13px; color:#a3b899; font-weight:bold;';
+                    
+                    let input = document.createElement('input');
+                    input.type = 'text';
+                    input.placeholder = 'Esperando entrada...';
+                    input.style.cssText = 'flex:1; padding:10px 12px; background:#0c1114; border:1px solid #2d3f44; border-radius:4px; color:white; font-size:14px; outline:none;';
+                    
+                    // Asignación de datos moderna
+                    input.dataset.varName = v; 
+                    input.addEventListener('input', generateLiveOutput);
+                    
+                    row.appendChild(label);
+                    row.appendChild(input);
+                    dynamicInputsContainer.appendChild(row);
+                });
+            }
+            generateLiveOutput();
+        }
+
+        function generateLiveOutput() {
+            const selectedId = codeSelect.value;
+            if(!selectedId) return;
+            
+            const codeObj = AppDB.codes.find(c => c.id === selectedId);
+            if(!codeObj) return;
+
+            let finalOutput = codeObj.template;
+            const inputs = dynamicInputsContainer.querySelectorAll('input');
+            
+            inputs.forEach(input => {
+                let pName = input.dataset.varName;
+                let val = input.value.trim();
+                
+                let replaceStr = val !== "" ? val : `[${pName.toUpperCase()}]`;
+                finalOutput = finalOutput.split(`[${pName}]`).join(replaceStr);
+            });
+
+            outputPreview.innerText = finalOutput;
+        }
+
+        function copyGeneratedText() {
+            if(!outputPreview.innerText) return;
+            navigator.clipboard.writeText(outputPreview.innerText).then(() => {
+                toast.style.display = 'block'; toast.style.animation = 'none'; toast.offsetHeight;
+                toast.style.animation = 'slideIn 0.3s ease, fadeOut 0.3s ease 2s forwards';
+                setTimeout(() => { toast.style.display = 'none'; }, 2300);
+            });
+        }
+
+        function resetFormFields() {
+            dynamicInputsContainer.querySelectorAll('input').forEach(i => i.value = '');
+            generateLiveOutput(); 
+        }
+
+        // PANEL DE ADMINISTRADOR
+        function poblarAdminControls() {
+            const moveCode = document.getElementById('moveCodeSelect');
+            const moveTarget = document.getElementById('moveTargetCatSelect');
+            const deleteCodeSelect = document.getElementById('deleteCodeSelect');
+            const deleteCatSelect = document.getElementById('deleteCatSelect');
+
+            moveCode.innerHTML = ''; moveTarget.innerHTML = ''; deleteCodeSelect.innerHTML = ''; deleteCatSelect.innerHTML = '';
+
+            AppDB.codes.forEach(c => {
+                let opt1 = document.createElement('option'); opt1.value = c.id; opt1.innerText = `[${AppDB.categories[c.cat] || 'N/A'}] - ${c.name}`;
+                let opt2 = opt1.cloneNode(true);
+                moveCode.appendChild(opt1); deleteCodeSelect.appendChild(opt2);
+            });
+
+            Object.keys(AppDB.categories).forEach(key => {
+                let opt1 = document.createElement('option'); opt1.value = key; opt1.innerText = AppDB.categories[key];
+                let opt2 = opt1.cloneNode(true);
+                moveTarget.appendChild(opt1); deleteCatSelect.appendChild(opt2);
+            });
+        }
+
+        function addNewCategory() {
+            const input = document.getElementById('newCatName');
+            const name = input.value.trim().toUpperCase();
+            if(!name) return;
+            const key = "cat_" + Date.now();
+            AppDB.categories[key] = name;
+            saveDB(); input.value = ''; poblarAdminControls(); alert("Categoría Creada.");
+        }
+
+        function addNewCode() {
+            const name = document.getElementById('newCodeName').value.trim();
+            const template = document.getElementById('newCodeTemplate').value.trim();
+            if(!name || !template || !activeCategoryKey) return alert("Faltan datos");
+
+            AppDB.codes.push({ id: "code_" + Date.now(), cat: activeCategoryKey, name: name, template: template });
+            saveDB(); document.getElementById('newCodeName').value = ''; document.getElementById('newCodeTemplate').value = '';
+            poblarAdminControls(); alert("Plantilla Guardada.");
+        }
+
+        function moveCodeCategory() {
+            const codeId = document.getElementById('moveCodeSelect').value;
+            const target = document.getElementById('moveTargetCatSelect').value;
+            const code = AppDB.codes.find(c => c.id === codeId);
+            if(code) { code.cat = target; saveDB(); poblarAdminControls(); alert("Código reubicado."); }
+        }
+
+        function deleteCode() {
+            const id = document.getElementById('deleteCodeSelect').value;
+            if(!id) return;
+            AppDB.codes = AppDB.codes.filter(c => c.id !== id);
+            saveDB(); poblarAdminControls(); alert("Código Eliminado.");
+        }
+
+        function deleteCategory() {
+            const key = document.getElementById('deleteCatSelect').value;
+            if(!key) return;
+            if(confirm("¿Seguro que quieres eliminar esta categoría y TODOS los códigos que hay dentro?")){
+                delete AppDB.categories[key];
+                AppDB.codes = AppDB.codes.filter(c => c.cat !== key);
+                if(activeCategoryKey === key) activeCategoryKey = Object.keys(AppDB.categories)[0] || "";
+                saveDB(); poblarAdminControls(); alert("Categoría destruida.");
+            }
+        }
+
+        function exportDatabase() {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(AppDB));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "scc_backup_sheriff.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        function triggerImportClick() { document.getElementById('importFileInput').click(); }
+
+        function importDatabase(input) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (parsed.categories && parsed.codes) {
+                        AppDB = parsed;
+                        saveDB();
+                        activeCategoryKey = Object.keys(AppDB.categories)[0] || "diez";
+                        poblarAdminControls();
+                        renderCategoryButtons();
+                        alert("¡Base de datos táctica restaurada con éxito!");
+                    } else { alert("El archivo no tiene el formato correcto de SCC."); }
+                } catch (err) { alert("Error crítico al leer el archivo JSON."); }
+            };
+            reader.readAsText(file);
+        }
+
+        window.onload = function() { 
+            renderCategoryButtons(); 
+        };
+    </script>
+</body>
+</html>
